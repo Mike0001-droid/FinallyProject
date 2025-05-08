@@ -1,4 +1,4 @@
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -7,8 +7,9 @@ from rest_framework import status
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from finally_project import settings
-from account.serializers import MyUserSerializer, MyTokenObtainPairSerializer
-from account.models import MyUser
+from account.serializers import MyUserSerializer, MyTokenObtainPairSerializer, \
+    MyTeamSerializer
+from account.models import MyUser, Team
 PermissionClass = IsAuthenticated if not settings.DEBUG else AllowAny
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -99,3 +100,19 @@ class MyUserViewSet(ViewSet):
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+
+
+class TeamViewSet(GenericViewSet):
+    queryset = Team
+    serializer_class = MyTeamSerializer
+
+    def list(self, request):
+        queryset = self.get_queryset().objects.all()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
+    
+    def retrieve(self, request, pk):
+        queryset = self.get_queryset()
+        model_file = get_object_or_404(queryset, id=pk)
+        serializer = self.get_serializer(model_file)
+        return Response(serializer.data, status=status.HTTP_200_OK)

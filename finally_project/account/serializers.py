@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, CharField, SerializerMethodField, ListField, IntegerField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from account.models import MyUser
+from account.models import MyUser, Team
 
 
 class MyUserSerializer(ModelSerializer):
@@ -14,13 +14,12 @@ class MyUserSerializer(ModelSerializer):
         fields = ('id', 'email', 'password', 
                   'first_name', 'last_name', 
                   'phone', 'date_joined', 
-                  'last_login',
+                  'last_login'
                   )
         extra_kwargs = {
             'password': {'write_only': True},
         }
     
-
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
@@ -33,3 +32,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['groups'] = list(user.groups.values_list('name', flat=True))
 
         return token
+
+
+class MyTeamSerializer(ModelSerializer):
+    users = MyUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Team
+        fields = ['id', 'name', 'date_joined', 'users']
