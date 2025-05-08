@@ -7,7 +7,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('users/', include('account.urls', namespace='user')),
+    path('', include('account.urls', namespace='')),
     path('token/create/', MyTokenObtainPairView.as_view(), name='token_auth'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

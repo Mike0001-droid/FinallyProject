@@ -54,7 +54,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
                                                           'Уберите эту отметку вместо удаления учётной записи.', default=True)
     is_staff = models.BooleanField('Статус персонала', help_text='Отметьте, если пользователь может входить в '
                                                                  'административную часть сайта.', default=False)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='users', snull=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='users', null=True)
 
     objects = MyUserManager()
 
