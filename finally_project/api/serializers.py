@@ -1,9 +1,19 @@
 from rest_framework.serializers import ModelSerializer
-from api.models import Task
+from api.models import Task, Evaluation
+from account.serializers import MyUserSerializer
+
+class EvaluationSerializer(ModelSerializer):
+    class Meta:
+        model = Evaluation
+        fields = '__all__'
 
 
 class TaskSerializer(ModelSerializer):
+    evaluation_task = EvaluationSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'description', 'deadline', 
+            'comments', 'status', 'evaluation_task',
+        )

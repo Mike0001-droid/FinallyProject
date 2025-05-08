@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import MyUser
 from django.utils import timezone
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 STATUS_CHOICES = (
@@ -19,3 +20,13 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.executor.last_name} - {self.name}"
+    
+
+class Evaluation(models.Model):
+    evaluator = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='evaluator')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='evaluation_task')
+    mark = models.IntegerField('Оценка', validators=[MaxValueValidator(5), MinValueValidator(1)])
+
+    def __str__(self):
+        return f"{self.task} - {self.mark}"
+    

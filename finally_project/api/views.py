@@ -1,13 +1,13 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from api.serializers import TaskSerializer
-from api.models import Task
+from api.serializers import TaskSerializer, EvaluationSerializer
+from api.models import Task, Evaluation
 
 
-class TaskViewSet(GenericViewSet):
-    queryset = Task
-    serializer_class = TaskSerializer
+class BaseViewSet(GenericViewSet):
+    queryset = None
+    serializer_class = None
 
     def list(self, request):
         queryset = self.get_queryset().objects.all()
@@ -28,5 +28,14 @@ class TaskViewSet(GenericViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class TaskViewSet(BaseViewSet):
+    queryset = Task
+    serializer_class = TaskSerializer
+
+
+class EvaluationViewSet(BaseViewSet):
+    queryset = Evaluation
+    serializer_class = EvaluationSerializer
 
 
