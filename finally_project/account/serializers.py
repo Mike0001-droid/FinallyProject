@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, CharField, SerializerMethodField, ListField, IntegerField
+from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from account.models import MyUser, Team
 

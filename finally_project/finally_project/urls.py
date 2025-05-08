@@ -7,9 +7,10 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('api.urls', namespace='')),
     path('', include('account.urls', namespace='')),
-    path('token/create/', MyTokenObtainPairView.as_view(), name='token_auth'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/create/', MyTokenObtainPairView.as_view(), name='token_auth'),
 ]
 
 if settings.DEBUG:

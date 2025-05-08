@@ -12,8 +12,8 @@ STATUS_CHOICES = (
 class Task(models.Model):
     name = models.CharField("Название задачи", max_length=100)
     description = models.TextField("Описание задачи", max_length=500)
-    executor = models.OneToOneField(MyUser, on_delete=models.CASCADE)
-    deadline = models.DateTimeField("Дата регистрации")
+    executor = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='user')
+    deadline = models.DateField("Дата регистрации")
     comments = models.TextField("Комментарии", max_length=500)
     status = models.CharField("Статус", choices=STATUS_CHOICES, max_length=9, default='Открыто')
 
