@@ -31,6 +31,15 @@ class MyUserManager(BaseUserManager):
         return user
 
 
+class Team(models.Model):
+    name = models.CharField('Название команды', max_length=100)
+    date_joined = models.DateField('Дата регистрации', default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+
+
 class MyUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         verbose_name='Емайл',
@@ -41,6 +50,11 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField('Фамилия', max_length=150, blank=True)
     phone = models.CharField('Телефон', max_length=15, blank=True, null=True, unique=True)
     date_joined = models.DateTimeField('Дата регистрации', default=timezone.now)
+    is_active = models.BooleanField('Активный', help_text='Отметьте, если пользователь должен считаться активным. '
+                                                          'Уберите эту отметку вместо удаления учётной записи.', default=True)
+    is_staff = models.BooleanField('Статус персонала', help_text='Отметьте, если пользователь может входить в '
+                                                                 'административную часть сайта.', default=False)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
 
     objects = MyUserManager()
 
@@ -59,4 +73,3 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-

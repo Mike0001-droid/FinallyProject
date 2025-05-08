@@ -5,7 +5,12 @@ from django.contrib.auth.forms import (
     AdminPasswordChangeForm
 )
 from account.forms import UserChangeForm, UserCreationForm
-from account.models import MyUser
+from account.models import MyUser, Team
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    pass
 
 
 class UserAdmin(BaseUserAdmin):
@@ -22,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone')}),
-        ('Permissions', {'fields': ('is_superuser', 'user_permissions', 'groups')}),
+        ('Permissions', {'fields': ('is_superuser', 'user_permissions', 'groups', 'team')}),
         ('Важные даты', {'fields': ('last_login', 'date_joined')})
     )
     # add_fieldsets не является стандартным атрибутом ModelAdmin. UserAdmin
