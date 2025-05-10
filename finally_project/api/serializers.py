@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from api.models import Task, Evaluation
-from account.serializers import MyUserSerializer
+
 
 class EvaluationSerializer(ModelSerializer):
     class Meta:
