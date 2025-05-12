@@ -22,8 +22,8 @@ class UserAdmin(BaseUserAdmin):
     # Поля, которые будут использоваться при отображении модели пользователя.
     # Они переопределяют определения в базовом User Admin,
     # которые ссылаются на определенные поля в auth.User.
-    list_display = ('id', 'email', 'is_superuser')
-    list_filter = ('is_superuser',)
+    list_display = ('id', 'email', 'is_superuser', 'get_groups')
+    list_filter = ('is_superuser', 'groups')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone')}),
@@ -42,6 +42,9 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
     filter_horizontal = ('user_permissions',)
 
+    def get_groups(self, obj):
+        return ", ".join([group.name for group in obj.groups.all()])
+    get_groups.short_description = 'Группы'
 
 admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)

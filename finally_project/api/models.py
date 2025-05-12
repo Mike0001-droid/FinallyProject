@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import MyUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
 
 
 STATUS_CHOICES = (
@@ -16,12 +17,12 @@ class Task(models.Model):
         MyUser, on_delete=models.CASCADE, 
         related_name='user', verbose_name='Исполнитель'
     )
-    deadline = models.DateField("Дата регистрации")
-    comments = models.TextField("Комментарии", max_length=500)
+    deadline = models.DateField("Дедлайн")
+    comments = models.TextField("Комментарии", max_length=500, null=True, blank=True)
     status = models.CharField("Статус", choices=STATUS_CHOICES, max_length=9, default='Открыто')
 
     def __str__(self):
-        return f"{self.executor.last_name} - {self.name}"
+        return f"{self.executor.email} - {self.name}"
     
     class Meta:
         verbose_name = 'Задание'
@@ -33,18 +34,17 @@ class Evaluation(models.Model):
         MyUser, on_delete=models.CASCADE, 
         related_name='evaluator', verbose_name="Оценщик"
     )
-    task = models.ForeignKey(
+    task = models.OneToOneField(
         Task, on_delete=models.CASCADE, 
-        related_name='evaluation_task', verbose_name="Задача"
+        related_name='evaluation_task', 
+        verbose_name="Задача"
     )
     mark = models.IntegerField('Оценка', validators=[MaxValueValidator(5), MinValueValidator(1)])
 
+    assessment_date = models.DateField('Дата оценивания', default=timezone.now)
+
     def __str__(self):
         return f"{self.task} - {self.mark}"
-    
-    class Meta:
-        verbose_name = 'Оценка'
-        verbose_name_plural = 'Оценки'
     
 
 class Meeting(models.Model):
