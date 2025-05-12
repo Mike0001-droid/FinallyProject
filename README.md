@@ -84,7 +84,7 @@
 
 3. Календарь встреч
     * Переходим по адресу /calendar
-        ![alt text](readme_images/calendar.png.png)
+        ![alt text](readme_images/calendar.png)
     * Здесь мы наблюдаем месячный вид наших встреч. Попробуем перейти на дневной вариант
         ![alt text](readme_images/day_calendar.png)
     * Здесь мы можем узнать подробную информацию о встрече, нажав кнопку "Подробнее"
