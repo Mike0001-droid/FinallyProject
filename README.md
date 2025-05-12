@@ -57,18 +57,28 @@
 
 2. Авторизация по JWT - токену
     * Запускаем сервер Django
+      
     * Переходим по адресу /api
+      
     * Открываем приложение token и нажимаем на запрос create_token 
         ![alt text](readme_images/create-token.png)
+      
     * Вводим свои данные и нажимаем синюю кнопку Send Request и копируем access токен из результата
         ![alt text](readme_images/response-token.png)
+      
     * В нижнем левом углу нажимаем на вкладку Authentication и нажимаем на token
         ![alt text](readme_images/token-button.png)
+   
     * Записываем в поле Scheme - Bearer, а в поле Token вставляем скопированный токен, затем нажимаем синюю кнопку Use Token Authentication
+      
         ![alt text](readme_images/token-insert.png)
+      
     * Возвращаемся к созданию оценки
+      
         ![alt text](readme_images/evaluation-create.png)
+      
     * После авторизации получаем вот такой результат
+      
         ![alt text](readme_images/evaluation-success.png)
 
 
