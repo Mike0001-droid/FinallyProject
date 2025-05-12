@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from django.db.models import Avg
 from django.contrib.auth.models import Group
 from account.models import MyUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 
 
 class BaseViewSet(GenericViewSet):
@@ -47,13 +48,20 @@ class TaskViewSet(BaseViewSet):
 class EvaluationViewSet(BaseViewSet):
     queryset = Evaluation
     serializer_class = EvaluationSerializer
-
+    
     def list(self, request):
         queryset = self.get_queryset().objects.filter(
             task__executor=request.user.pk
         )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK) 
+    
+    def get_permissions(self):
+        if self.action == "list":
+            permission_classes = [AllowAny]
+        elif self.action == "create":
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
 
 
 class MeetingViewSet(BaseViewSet):

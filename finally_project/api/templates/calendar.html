@@ -49,20 +49,16 @@
                         {% for week in month_days %}
                         <tr>
                             {% for day in week %}
-                            <td class="p-1 {% if day.date.month != current_month.month %}bg-light text-muted{% endif %} {% if day.date == today.date %}table-warning{% endif %}" style="height: 120px; vertical-align: top;">
+                            <td class="p-1 {% if day.date.month != current_month.month %}bg-light text-muted{% endif %} {% if day.date == today.date %}table-warning{% endif %}" style="height: 100px; width: 100px; ; vertical-align: top;">
                                 <div class="d-flex justify-content-between">
                                     <span class="badge {% if day.date == today.date %}bg-warning text-dark{% else %}bg-light text-dark{% endif %} rounded-circle p-1 ms-1">{{ day.date.day }}</span>
                                     {% if day.meetings.count > 0 %}
                                     <span class="badge bg-primary rounded-pill me-1">{{ day.meetings.count }}</span>
                                     {% endif %}
                                 </div>
-                                <div class="mt-1 overflow-auto" style="max-height: 80px;">
-                                    {% for meeting in day.meetings %}
-                                    <a href="#" class="d-block text-decoration-none mb-1 p-1 bg-primary text-white rounded small" data-bs-toggle="tooltip" title="{{ meeting.title|default:'Встреча' }}">
-                                        {{ meeting.start_time|time:"H:i" }} - {{ "Встреча"|truncatechars:12 }}
-                                    </a>
-                                    {% endfor %}
-                                </div>
+                                {% for meeting in day.meetings %}
+                                    Встреча в {{ meeting.start_time|time:"H:i" }}
+                                {% endfor %}
                             </td>
                             {% endfor %}
                         </tr>

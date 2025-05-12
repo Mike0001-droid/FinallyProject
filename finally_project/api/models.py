@@ -40,12 +40,15 @@ class Evaluation(models.Model):
         verbose_name="Задача"
     )
     mark = models.IntegerField('Оценка', validators=[MaxValueValidator(5), MinValueValidator(1)])
-
     assessment_date = models.DateField('Дата оценивания', default=timezone.now)
 
     def __str__(self):
         return f"{self.task} - {self.mark}"
     
+    class Meta:
+        verbose_name = 'Оценка'
+        verbose_name_plural = 'Оценки'
+
 
 class Meeting(models.Model):
     start_time = models.DateTimeField()
