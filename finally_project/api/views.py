@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 from django.db.models import Avg
 from django.contrib.auth.models import Group
 from account.models import MyUser
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 
 
 class BaseViewSet(GenericViewSet):
@@ -49,16 +49,24 @@ class EvaluationViewSet(BaseViewSet):
     queryset = Evaluation
     serializer_class = EvaluationSerializer
     
-    def list(self, request):
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path=r'get_by_user/(?P<user_id>[^/]+)',
+        url_name='get-by-user'
+    )
+    def get_by_user(self, request, user_id):
         queryset = self.get_queryset().objects.filter(
-            task__executor=request.user.pk
+            task__executor=user_id
         )
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def get_permissions(self):
         if self.action == "list":
-            permission_classes = [AllowAny]
+            permission_classes = [IsAdminUser]
+        elif self.action == "get_by_user":
+            permission_classes = [IsAuthenticated]
         elif self.action == "create":
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]

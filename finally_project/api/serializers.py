@@ -11,19 +11,26 @@ class MeetingSerializer(ModelSerializer):
 
 
 class EvaluationSerializer(ModelSerializer):
+    task_name = serializers.CharField(source='task.name', read_only=True)
+    evaluator_email = serializers.CharField(source='evaluator.email', read_only=True)
+    
     class Meta:
         model = Evaluation
         fields = '__all__'
+        extra_kwargs = {
+            'task': {'write_only': True},
+            'evaluator': {'write_only': True},
+        }
 
 
 class TaskSerializer(ModelSerializer):
-    evaluation_task = EvaluationSerializer(many=True, read_only=True)
+    mark = serializers.IntegerField(source='evaluation_task.mark')
 
     class Meta:
         model = Task
         fields = (
             'id', 'name', 'description', 'deadline', 
-            'comments', 'status', 'evaluation_task',
+            'comments', 'status', 'mark',
         )
 
 
