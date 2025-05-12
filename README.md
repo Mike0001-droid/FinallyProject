@@ -1,5 +1,6 @@
 ﻿# PlainProject
-Проект: Система управления бизнесом (Упрощённая версия)![GitHub top language](https://img.shields.io/github/languages/top/Mike0001-droid/FinallyProject)
+Проект: Система управления бизнесом (Упрощённая версия)
+![GitHub top language](https://img.shields.io/github/languages/top/Mike0001-droid/FinallyProject)
 <!--Установка-->
 ## Установка 
 У вас должны быть установлены [зависимости проекта](https://github.com/Mike0001-droid/FinallyProject/blob/main/requirements.txt)
