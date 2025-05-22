@@ -11,18 +11,25 @@ STATUS_CHOICES = (
 ) 
 
 class Task(models.Model):
-    name = models.CharField("Название задачи", max_length=100)
+
+    class StatusChoices(models.TextChoices):
+        OPEN = 'Открыто'
+        IN_PROCESS = 'В работе'
+        COMPLETED = 'Выпоолнено'
+
+    name = models.CharField("Название задачи", max_length=150)
     description = models.TextField("Описание задачи", max_length=500)
     executor = models.ForeignKey(
         MyUser, on_delete=models.CASCADE, 
-        related_name='user', verbose_name='Исполнитель'
+        related_name='tasks_as_executor', 
+        verbose_name='Исполнитель'
     )
     deadline = models.DateField("Дедлайн")
     comments = models.TextField("Комментарии", max_length=500, null=True, blank=True)
-    status = models.CharField("Статус", choices=STATUS_CHOICES, max_length=9, default='Открыто')
+    status = models.CharField("Статус", choices=StatusChoices, default='Открыто')
 
     def __str__(self):
-        return f"{self.executor.email} - {self.name}"
+        return f"{self.name} ({self.executor.email})"
     
     class Meta:
         verbose_name = 'Задание'
@@ -32,11 +39,10 @@ class Task(models.Model):
 class Evaluation(models.Model):
     evaluator = models.ForeignKey(
         MyUser, on_delete=models.CASCADE, 
-        related_name='evaluator', verbose_name="Оценщик"
+        related_name='evaluations_given', verbose_name="Оценщик"
     )
     task = models.OneToOneField(
         Task, on_delete=models.CASCADE, 
-        related_name='evaluation_task', 
         verbose_name="Задача"
     )
     mark = models.IntegerField('Оценка', validators=[MaxValueValidator(5), MinValueValidator(1)])
@@ -51,7 +57,7 @@ class Evaluation(models.Model):
 
 
 class Meeting(models.Model):
-    start_time = models.DateTimeField()
+    start_time = models.DateTimeField("Начало встречи")
     participants = models.ManyToManyField(
         MyUser, through='MeetingParticipation', 
         verbose_name="Участники"
@@ -65,13 +71,13 @@ class Meeting(models.Model):
 class MeetingParticipation(models.Model):
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     participant = models.ForeignKey(MyUser, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(editable=False, blank=True)
+    start_time = models.DateTimeField(editable=False, null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['participant', 'start_time'],
-                violation_error_message="Object not unique!",
+                violation_error_message="Участник уже записан на встречу в это время!",
                 name='unique_participant_per_time'
             )
         ]
