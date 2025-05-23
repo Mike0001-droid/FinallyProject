@@ -5,20 +5,31 @@ from api.serializers import TaskSerializer, EvaluationSerializer, \
     MeetingSerializer, PeriodSerializer, GroupSerializer
 from api.models import Task, Evaluation, Meeting
 from django.shortcuts import get_object_or_404
-from calendar import Calendar
+from calendar import Calendar as SysCalendar
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import render
 from rest_framework.decorators import action
 from django.db.models import Avg
-from django.contrib.auth.models import Group
 from account.models import MyUser
-from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from django.conf import settings
+from django.apps import apps
+
+
+FIRST_WEEKDAY = 0 
+
+
+def get_group_model():
+    try:
+        custom_group_model = getattr(settings, 'AUTH_GROUP_MODEL', None)
+        if custom_group_model:
+            return apps.get_model(custom_group_model)
+    except (LookupError, AttributeError):
+        pass
 
 
 class BaseViewSet(GenericViewSet):
-    queryset = None
-    serializer_class = None
 
     def list(self, request):
         queryset = self.get_queryset().objects.all()
@@ -27,7 +38,7 @@ class BaseViewSet(GenericViewSet):
     
     def retrieve(self, request, pk):
         queryset = self.get_queryset()
-        model_file = get_object_or_404(queryset, id=pk)
+        model_file = get_object_or_404(queryset, pk=pk)
         serializer = self.get_serializer(model_file)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -69,6 +80,8 @@ class EvaluationViewSet(BaseViewSet):
             permission_classes = [IsAuthenticated]
         elif self.action == "create":
             permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
 
@@ -96,7 +109,7 @@ class ByPeriodViewSet(GenericViewSet):
             assessment_date__range=(start_date, end_date)
         ).aggregate(Avg('mark'))['mark__avg']
 
-        result = average if average else "Оценок не найдено!"
+        result = average if average else None
         return Response(
             {"average": result}, 
             status=status.HTTP_201_CREATED
@@ -104,7 +117,7 @@ class ByPeriodViewSet(GenericViewSet):
     
 
 class GroupManagerViewSet(BaseViewSet):
-    queryset = Group
+    queryset = get_group_model()
     serializer_class = GroupSerializer
     
     @action(detail=False, methods=['post'], url_path='add-to-group')
@@ -117,7 +130,7 @@ class GroupManagerViewSet(BaseViewSet):
 
         user = get_object_or_404(MyUser, pk = user_id)
             
-        group = get_object_or_404(Group, name = group_name)
+        group = get_object_or_404(self.get_queryset(), name = group_name)
         
         user.groups.add(group)
 
@@ -136,7 +149,7 @@ class GroupManagerViewSet(BaseViewSet):
 
         user = get_object_or_404(MyUser, pk=user_id)
             
-        group = get_object_or_404(Group, name=group_name)
+        group = get_object_or_404(self.get_queryset(), name=group_name)
         
         user.groups.remove(group)
 
@@ -151,17 +164,17 @@ def calendar_view(request):
 
     try:
         current_date = timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d').date()
-    except:
+    except ValueError:
         current_date = timezone.now().date()
     
     if view == 'month':
-        cal = Calendar(firstweekday=0)
+        cal = SysCalendar(FIRST_WEEKDAY)
         month_days = cal.monthdatescalendar(current_date.year, current_date.month)
         
         meetings = Meeting.objects.filter(
             start_time__year=current_date.year,
             start_time__month=current_date.month
-        ).order_by('start_time')
+        ).order_by('start_time').prefetch_related("participants")
         
         month_with_meetings = []
         for week in month_days:
@@ -174,10 +187,10 @@ def calendar_view(request):
                 })
             month_with_meetings.append(week_with_meetings)
             
-        all_participants = []
-        for participant in meetings:
-            for user in participant.participants.all():
-                all_participants.append(user)
+        all_participants = set()
+        for meeting in meetings:
+            for user in meeting.participants.all():
+                all_participants.add(user)
 
         context = {
             'view': view,
@@ -189,12 +202,11 @@ def calendar_view(request):
     else:
         meetings = Meeting.objects.filter(
             start_time__date=current_date
-        ).order_by('start_time')
-
-        all_participants = []
-        for participant in meetings:
-            for user in participant.participants.all():
-                all_participants.append(user)
+        ).order_by('start_time').prefetch_related("participants")
+        all_participants = set()
+        for meeting in meetings:
+            for user in meeting.participants.all():
+                all_participants.add(user)
 
         context = {
             'view': view,

@@ -59,6 +59,7 @@ REST_FRAMEWORK = {
 WSGI_APPLICATION = 'finally_project.wsgi.application'
 
 AUTH_USER_MODEL = 'account.MyUser'
+AUTH_GROUP_MODEL = 'auth.Group'
 
 DATABASES = {
     'default': {
