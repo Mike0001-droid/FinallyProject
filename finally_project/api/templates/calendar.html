@@ -14,6 +14,12 @@
             <a href="/admin/api/meeting/" class="btn btn-outline-primary">
                 Добавить встречу
             </a>
+            <a href="" class="btn btn-outline-primary">
+                {{request.user}}
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-primary">
+                Выйти            
+            </a>
         </div>
     </div>
 

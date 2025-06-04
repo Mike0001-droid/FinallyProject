@@ -1,0 +1,71 @@
+<h2>Создать встречу</h2>
+<form method="post" id="meeting-form">
+    {% csrf_token %}
+    {{ meeting_form.as_p }}
+    
+    <h3>Участники</h3>
+    <div id="participants-formset">
+        {{ formset.management_form }}
+        {% for form in formset %}
+            <div class="participant-form">
+                {{ form.as_p }}
+                <button type="button" class="remove-participant">Удалить</button>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <button type="button" id="add-participant">Добавить участника</button>
+    <button type="submit">Сохранить</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let formCount = parseInt($('#id_participants-TOTAL_FORMS').val());
+    $('#add-participant').click(function() {
+        const newForm = $('.participant-form').first().clone(true);
+        formCount++;
+
+        newForm.find(':input').each(function() {
+            const $input = $(this);
+            const name = $input.attr('name');
+            const id = $input.attr('id');
+
+            if (name) {
+                $input.attr('name', name.replace(/participants-\d+-/, `participants-${formCount}-`));
+            }
+            if (id) {
+                $input.attr('id', id.replace(/id_participants-\d+-/, `id_participants-${formCount}-`));
+            }
+            $input.val('');
+        });
+
+        $('#participants-formset').append(newForm);
+        $('#id_participants-TOTAL_FORMS').val(formCount);
+    });
+
+    $('#meeting-form').submit(function() {
+        $('.participant-form').each(function(index) {
+            $(this).find(':input').each(function() {
+                const $input = $(this);
+                const name = $input.attr('name');
+                const id = $input.attr('id');
+
+                if (name) {
+                    $input.attr('name', name.replace(/participants-\d+-/, `participants-${index}-`));
+                }
+                if (id) {
+                    $input.attr('id', id.replace(/id_participants-\d+-/, `id_participants-${index}-`));
+                }
+            });
+        });
+        $('#id_participants-TOTAL_FORMS').val($('.participant-form').length);
+    });
+
+    $(document).on('click', '.remove-participant', function() {
+        $(this).closest('.participant-form').remove();
+        const forms = $('.participant-form');
+        $('#id_participants-TOTAL_FORMS').val(forms.length);
+    });
+});
+</script>

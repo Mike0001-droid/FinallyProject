@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import TaskSerializer, EvaluationSerializer, \
     MeetingSerializer, PeriodSerializer, GroupSerializer
-from api.models import Task, Evaluation, Meeting
+from api.models import Task, Evaluation, Meeting, MeetingParticipation
 from django.shortcuts import get_object_or_404
 from calendar import Calendar as SysCalendar
 from django.utils import timezone
@@ -15,6 +15,11 @@ from account.models import MyUser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from django.conf import settings
 from django.apps import apps
+from django.forms import formset_factory
+from django.shortcuts import render, redirect
+from .forms import MeetingForm, ParticipationForm
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import JsonResponse
 
 
 FIRST_WEEKDAY = 0 
@@ -161,10 +166,9 @@ class GroupManagerViewSet(BaseViewSet):
     
 def calendar_view(request):
     view = request.GET.get('view', 'month')
-
     try:
         current_date = timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d').date()
-    except ValueError:
+    except:
         current_date = timezone.now().date()
     
     if view == 'month':
@@ -197,7 +201,8 @@ def calendar_view(request):
             'all_participants': all_participants,
             'current_month': current_date,
             'month_days': month_with_meetings,
-            'today': timezone.now()
+            'today': timezone.now(),
+            'user': request.user
         }
     else:
         meetings = Meeting.objects.filter(
@@ -219,3 +224,27 @@ def calendar_view(request):
         }
     
     return render(request, 'calendar.html', context)
+
+def create_meeting(request):
+    ParticipationFormSet = formset_factory(ParticipationForm, extra=1)
+    
+    if request.method == 'POST':
+        meeting_form = MeetingForm(request.POST)
+        formset = ParticipationFormSet(request.POST, prefix='participants')
+        if meeting_form.is_valid() and formset.is_valid():
+            meeting = meeting_form.save()
+            for form in formset:
+                if form.cleaned_data.get('participant'):
+                    MeetingParticipation.objects.create(
+                        meeting=meeting,
+                        participant=form.cleaned_data['participant']
+                    )
+            return redirect('calendar')
+    else:
+        meeting_form = MeetingForm()
+        formset = ParticipationFormSet(prefix='participants')
+    
+    return render(request, 'create.html', {
+        'meeting_form': meeting_form,
+        'formset': formset,
+    })

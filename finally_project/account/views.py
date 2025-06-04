@@ -11,6 +11,36 @@ from account.serializers import MyUserSerializer, MyTokenObtainPairSerializer, \
     MyTeamSerializer
 from account.models import MyUser, Team
 PermissionClass = IsAuthenticated if not settings.DEBUG else AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+
+
+from django.contrib.auth import logout
+
+class LogoutView(APIView):
+    #permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh_token")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            logout(request)
+            response = Response({"detail": "Successfully logged out"})
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            response.delete_cookie('sessionid')
+            
+            return response
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+        
 
 class MyTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
