@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход</title>
     <style>
+        /* Ваши стили остаются без изменений */
         body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .auth-box { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         h2 { margin-top: 0; text-align: center; color: #333; }
@@ -36,7 +37,7 @@
             <button type="submit">Войти</button>
         </form>
         <div class="links">
-            Нет аккаунта? <a href="/register/">Зарегистрируйтесь</a>
+            Нет аккаунта? <a href="/signup/">Зарегистрируйтесь</a>
         </div>
     </div>
 
@@ -63,7 +64,7 @@
                         email: form.email.value,
                         password: form.password.value
                     }),
-                    credentials: 'include'
+                    credentials: 'include'  // Важно для куков
                 });
                 
                 if (!response.ok) {
@@ -72,13 +73,22 @@
                 }
                 
                 const data = await response.json();
+                
+                // Сохраняем токены в localStorage
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
                 
-                // Перенаправляем на главную или next-параметр
+                // Устанавливаем куки вручную
+                document.cookie = `access_token=${data.access}; path=/; SameSite=Lax`;
+                document.cookie = `refresh_token=${data.refresh}; path=/; SameSite=Lax`;
+                        
+                // Исправленное перенаправление
                 const urlParams = new URLSearchParams(window.location.search);
-                window.location.href = urlParams.get('next') || '/';
+                const nextParam = urlParams.get('next');
                 
+                // Перенаправляем либо на указанный next, либо на /calendar/
+                window.location.href = nextParam || '/calendar/';
+        
             } catch (error) {
                 errorEl.textContent = error.message;
                 console.error('Login error:', error);
@@ -87,6 +97,13 @@
                 submitBtn.textContent = 'Войти';
             }
         });
+
+        // Вспомогательная функция для получения куков
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
     </script>
 </body>
 </html>

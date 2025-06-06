@@ -1,0 +1,103 @@
+{% load static %}
+<div class="task-detail-container">
+    <h1>Просмотр задачи </h1>
+    
+
+    <div class="task-header">
+        <h2>{{ task.name }}</h2>
+        <span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span>
+    </div>
+    
+    <div class="task-meta">
+        <div><strong>Исполнитель:</strong> {{ task.executor.email }}</div>
+        <div><strong>Дедлайн:</strong> {{ task.deadline|date:"d.m.Y" }}</div>
+    </div>
+    
+    <div class="task-section">
+        <h3>Описание</h3>
+        <p>{{ task.description }}</p>
+    </div>
+    
+    {% if task.comments %}
+    <div class="task-section">
+        <h3>Комментарии</h3>
+        <p>{{ task.comments }}</p>
+    </div>
+    {% endif %}
+    
+    <div class="task-actions">
+        {% if is_admin %}
+            <a href="{% url 'edit_task' task.id %}" class="btn btn-edit">Редактировать</a>
+        {% endif %}
+        <a href="{% url 'tasks_list' %}" class="btn btn-back">Назад к списку</a>
+        <a href="{% url 'calendar' %}" class="btn btn-back">Домой</a>
+    </div>
+</div>
+
+<style>
+    .task-detail-container {
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .task-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+    }
+    
+    .status-Открыто { background-color: #d4edda; color: #155724; }
+    .status-В работе { background-color: #fff3cd; color: #856404; }
+    .status-Завершено { background-color: #cce5ff; color: #004085; }
+    
+    .task-meta {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .task-meta div {
+        margin-bottom: 5px;
+    }
+    
+    .task-section {
+        margin-bottom: 20px;
+    }
+    
+    .task-section h3 {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .task-actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    
+    .btn-edit {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+    }
+</style>

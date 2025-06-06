@@ -1,0 +1,138 @@
+{% load static %}
+<div class="task-form-container">
+    <h1>{% if form.instance.pk %}Редактирование задачи{% else %}Создание новой задачи{% endif %}</h1>
+    
+    <form method="post" class="task-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">Название задачи:</label>
+            {{ form.name }}
+            {{ form.name.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Описание:</label>
+            {{ form.description }}
+            {{ form.description.errors }}
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.executor.id_for_label }}">Исполнитель:</label>
+                {{ form.executor }}
+                {{ form.executor.errors }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.deadline.id_for_label }}">Дедлайн:</label>
+                {{ form.deadline }}
+                {{ form.deadline.errors }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Статус:</label>
+                {{ form.status }}
+                {{ form.status.errors }}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.comments.id_for_label }}">Комментарии:</label>
+            {{ form.comments }}
+            {{ form.comments.errors }}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-save">Сохранить</button>
+            <a href="{% url 'tasks_list' %}" class="btn btn-cancel">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .task-form-container {
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .task-form {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .form-actions {
+        margin-top: 20px;
+        text-align: right;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .btn-save {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        margin-left: 10px;
+    }
+    
+    .errorlist {
+        color: #dc3545;
+        margin-top: 5px;
+        padding-left: 0;
+        list-style: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация datepicker для поля дедлайна
+        if (document.getElementById('id_deadline')) {
+            document.getElementById('id_deadline').type = 'date';
+        }
+    });
+</script>

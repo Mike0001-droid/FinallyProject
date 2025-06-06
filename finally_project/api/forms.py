@@ -1,5 +1,5 @@
 from django import forms
-from .models import Meeting, MeetingParticipation, MyUser
+from .models import Meeting, MeetingParticipation, MyUser, Task
 
 class MeetingForm(forms.ModelForm):
     class Meta:
@@ -15,3 +15,13 @@ class ParticipationForm(forms.ModelForm):
     class Meta:
         model = MeetingParticipation
         fields = ['participant']
+
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['name', 'description', 'executor', 'deadline', 'status', 'comments']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'comments': forms.Textarea(attrs={'rows': 4}),
+        }

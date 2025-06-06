@@ -11,9 +11,21 @@
             <a href="?view=day&date={{ current_date|date:'Y-m-d' }}" class="btn btn-outline-primary {% if view == 'day' %}active{% endif %}">
                 <i class="bi bi-calendar-day"></i> День
             </a>
-            <a href="/admin/api/meeting/" class="btn btn-outline-primary">
-                Добавить встречу
-            </a>
+            {% if is_admin %}
+                <a href="{% url 'create_meeting' %}" class="btn btn-outline-primary">
+                    Добавить встречу
+                </a>                
+            {% endif %}
+            {% if is_admin %}            
+                <a href="{% url 'create_task' %}" class="btn btn-outline-primary">
+                    Добавить задачу
+                </a>
+            {% else %}
+                <a href="{% url 'tasks_list' %}" class="btn btn-outline-primary">
+                    Задачи
+                </a>
+            {% endif %}
+
             <a href="" class="btn btn-outline-primary">
                 {{request.user}}
             </a>

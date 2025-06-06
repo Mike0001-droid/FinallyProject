@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.serializers import TaskSerializer, EvaluationSerializer, \
     MeetingSerializer, PeriodSerializer, GroupSerializer
-from api.models import Task, Evaluation, Meeting, MeetingParticipation
+from api.models import Task, Evaluation, Meeting, MeetingParticipation, STATUS_CHOICES
 from django.shortcuts import get_object_or_404
 from calendar import Calendar as SysCalendar
 from django.utils import timezone
@@ -18,12 +18,14 @@ from django.apps import apps
 from django.forms import formset_factory
 from django.shortcuts import render, redirect
 from .forms import MeetingForm, ParticipationForm
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.http import JsonResponse
-
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import TaskForm
 
 FIRST_WEEKDAY = 0 
 
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
 
 def get_group_model():
     try:
@@ -163,7 +165,7 @@ class GroupManagerViewSet(BaseViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    
+@login_required
 def calendar_view(request):
     view = request.GET.get('view', 'month')
     try:
@@ -202,7 +204,9 @@ def calendar_view(request):
             'current_month': current_date,
             'month_days': month_with_meetings,
             'today': timezone.now(),
-            'user': request.user
+            'user': request.user,
+            'is_admin': is_admin(request.user)
+
         }
     else:
         meetings = Meeting.objects.filter(
@@ -220,11 +224,15 @@ def calendar_view(request):
             'day_meetings': meetings,
             'previous_day': current_date - timedelta(days=1),
             'next_day': current_date + timedelta(days=1),
-            'hours': range(0, 24)
+            'hours': range(0, 24),
+            'is_admin': is_admin(request.user)
+
         }
     
     return render(request, 'calendar.html', context)
 
+@login_required
+@user_passes_test(is_admin)
 def create_meeting(request):
     ParticipationFormSet = formset_factory(ParticipationForm, extra=1)
     
@@ -247,4 +255,64 @@ def create_meeting(request):
     return render(request, 'create.html', {
         'meeting_form': meeting_form,
         'formset': formset,
+    })
+
+
+@login_required
+def tasks_list(request):
+    if is_admin(request.user):
+        tasks = Task.objects.all()
+    else:
+        tasks = Task.objects.filter(executor=request.user)
+    status_filter = request.GET.get('status')
+    
+    if status_filter:
+        tasks = tasks.filter(status=status_filter)
+    
+    return render(request, 'tasks_list.html', {
+        'tasks': tasks,
+        'status_choices': STATUS_CHOICES,
+        'is_admin': is_admin(request.user)
+    })
+
+@login_required
+@user_passes_test(is_admin)
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save()
+            return redirect('task_detail', task_id=task.id)
+    else:
+        form = TaskForm()
+    
+    return render(request, 'task_form.html', {
+        'form': form,
+        'is_admin': True
+    })
+
+@login_required
+def task_detail(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    return render(request, 'task_detail.html', {
+        'task': task,
+        'is_admin': is_admin(request.user)
+    })
+
+@login_required
+@user_passes_test(is_admin)
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task_detail', task_id=task.id)
+    else:
+        form = TaskForm(instance=task)
+    
+    return render(request, 'task_form.html', {
+        'form': form,
+        'is_admin': True
     })

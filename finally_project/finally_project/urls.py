@@ -19,9 +19,10 @@ urlpatterns = [
     path('signup/', TemplateView.as_view(template_name='signup.html'), name='signup'),
     path('logout/', TemplateView.as_view(template_name='logout.html'), name='logout'),
     path('api/logout/', LogoutView.as_view(), name='api_logout'),
-    
-
-    
+    path('tasks/', views.tasks_list, name='tasks_list'),
+    path('tasks/create/', views.create_task, name='create_task'),
+    path('tasks/<int:task_id>/', views.task_detail, name='task_detail'),
+    path('tasks/<int:task_id>/edit/', views.edit_task, name='edit_task'),
 ]
 
 
